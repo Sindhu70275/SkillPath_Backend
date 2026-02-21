@@ -1,1 +1,8 @@
-node_modules/@mongodb-js/saslprep/dist/code-points-data-browser.js
+# Ignore node_modules
+node_modules/
+
+# Optional: ignore environment files
+.env
+
+# Logs
+*.log
