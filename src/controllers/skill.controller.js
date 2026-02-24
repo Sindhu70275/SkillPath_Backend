@@ -1,6 +1,7 @@
 import {
   createSkillService,
   getSkillsService,
+  getSkillTagsService,
 } from "../services/skill.service.js";
 
 export const createSkill = async (req, res) => {
@@ -24,6 +25,16 @@ export const getSkills = async (req, res, next) => {
     res.status(200).json({
       data: skills,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSkillTags = async (res, next) => {
+  try {
+    const skillTags = await getSkillTagsService();
+
+    res.status(200).json(skillTags);
   } catch (error) {
     next(error);
   }
