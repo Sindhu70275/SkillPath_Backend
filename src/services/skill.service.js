@@ -35,3 +35,8 @@ export const getSkillsService = async (query) => {
   const skills = await Skill.find(filter).sort({ createdAt: -1 });
   return skills;
 };
+
+export const getSkillTagsService = async () => {
+  const skillTags = await Skill.distinct("tags");
+  return skillTags;
+};
