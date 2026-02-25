@@ -10,9 +10,9 @@ import {
 const router = express.Router();
 
 router.post("/", createSkill);
+router.get("/tags", getSkillTags);   
 router.get("/:id", getSkillById);
 router.put("/:id", updateSkill);
 router.get("/", getSkills);
-router.get("/tags", getSkillTags);
 
 export default router;
