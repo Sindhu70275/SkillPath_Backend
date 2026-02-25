@@ -25,6 +25,20 @@ const skillSchema = new mongoose.Schema(
       required: true,
     },
     tags: [String],
+    durationInHours: Number,
+    modules: [
+      {
+        title: String,
+        durationInMinutes: Number,
+        order: Number,
+      },
+    ],
+    prerequisites: [String],
+    learningOutcomes: [String],
+    enrolledCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );
