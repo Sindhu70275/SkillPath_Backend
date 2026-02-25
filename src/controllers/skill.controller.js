@@ -30,7 +30,7 @@ export const getSkills = async (req, res, next) => {
   }
 };
 
-export const getSkillTags = async (res, next) => {
+export const getSkillTags = async (_req, res, next) => {
   try {
     const skillTags = await getSkillTagsService();
 
