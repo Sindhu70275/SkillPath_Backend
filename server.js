@@ -21,10 +21,10 @@ app.use(
   }),
 );
 
-app.use(errorHandler);
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
 app.use("/api/skills", skillRoutes);
+
+app.use(errorHandler);

@@ -10,6 +10,13 @@ export const createSkillService = async (skillData) => {
   return skill;
 };
 
+export const updateSkillService = async (id, updateData) => {
+  const updatedSkill = await Skill.findByIdAndUpdate(id, updateData, {
+    new: true,
+  });
+  return updatedSkill;
+};
+
 export const getSkillsService = async (query) => {
   const { category, level, search, tags } = query;
   const filter = {};
@@ -34,6 +41,11 @@ export const getSkillsService = async (query) => {
 
   const skills = await Skill.find(filter).sort({ createdAt: -1 });
   return skills;
+};
+
+export const getSkillByIdService = async (id) => {
+  const skillDetail = await Skill.findById(id);
+  return skillDetail;
 };
 
 export const getSkillTagsService = async () => {
