@@ -5,6 +5,7 @@ import cors from "cors";
 import connectDB from "./src/config/db.js";
 import errorHandler from "./src/middleware/errorHandler.js";
 
+import authRoutes from "./src/routes/auth.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/skills", skillRoutes);
 
 app.use(errorHandler);
