@@ -16,13 +16,20 @@ export const registerService = async (username, emailId, password) => {
     password: hashedPassword,
   });
 
-  return user;
+  const payload = {
+    id: user._id,
+    role: user.role,
+    name: user.username,
+  };
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+  return { user, token };
 };
 
 export const loginService = async (emailId, password) => {
   const user = await User.findOne({ emailId });
   if (!user) {
-    throw new Error("EmailId do not exist");
+    throw new Error("User do not exist");
   }
 
   const match = await bcrypt.compare(password, user.password);
@@ -37,5 +44,5 @@ export const loginService = async (emailId, password) => {
   };
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-  return token;
+  return { user, token };
 };
