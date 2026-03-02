@@ -1,12 +1,13 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 import User from "../models/user.model.js";
+import { generateToken, createUserData } from "../utils/tokenUtils.js";
+import { AppError } from "../utils/AppError.js";
 
 export const registerService = async (username, emailId, password) => {
   const existingUser = await User.findOne({ emailId });
   if (existingUser) {
-    throw new Error("User already Exists");
+    throw new AppError("User already exists", 400);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -16,26 +17,25 @@ export const registerService = async (username, emailId, password) => {
     password: hashedPassword,
   });
 
-  return user;
+  const userData = createUserData(user);
+  const token = generateToken(user);
+
+  return { userData, token };
 };
 
 export const loginService = async (emailId, password) => {
   const user = await User.findOne({ emailId });
   if (!user) {
-    throw new Error("EmailId do not exist");
+    throw new AppError("User does not exist", 404);
   }
 
   const match = await bcrypt.compare(password, user.password);
   if (!match) {
-    throw new Error("Invalid Password");
+    throw new AppError("Invalid password", 401);
   }
 
-  const payload = {
-    id: user._id,
-    role: user.role,
-    name: user.username,
-  };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const userData = createUserData(user);
+  const token = generateToken(user);
 
-  return token;
+  return { userData, token };
 };
