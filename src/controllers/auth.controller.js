@@ -9,7 +9,7 @@ export const register = async (req, res, next) => {
       status: "success",
       message: "User created successfully!",
       data: {
-        ...userData,
+        user: userData,
         token,
       },
     });
@@ -27,7 +27,7 @@ export const login = async (req, res, next) => {
       status: "success",
       message: "Login successful!",
       data: {
-        ...userData,
+        user: userData,
         token,
       },
     });
