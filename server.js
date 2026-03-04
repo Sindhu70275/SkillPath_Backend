@@ -7,6 +7,7 @@ import errorHandler from "./src/middlewares/error.errorHandler.js";
 
 import authRoutes from "./src/routes/auth.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
+import enrollmentRoutes from "./src/routes/enrollment.routes.js";
 
 dotenv.config();
 connectDB();
@@ -28,5 +29,6 @@ app.listen(PORT, () => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/skills", skillRoutes);
+app.use("/api", enrollmentRoutes);
 
 app.use(errorHandler);

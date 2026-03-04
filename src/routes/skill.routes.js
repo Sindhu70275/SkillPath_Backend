@@ -6,14 +6,16 @@ import {
 	getSkillTags,
 	getSkillById,
 } from "../controllers/skill.controller.js";
-import { protect, authorize} from "../middlewares/auth.middleware.js";
+import { protect, authorize } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, authorize("admin"), createSkill); 
-router.get("/tags", protect, getSkillTags);
-router.get("/:id", protect, getSkillById);
-router.put("/:id", protect, authorize("admin"), updateSkill);
-router.get("/", protect, getSkills);
+router.use(protect);
+
+router.post("/", authorize("admin"), createSkill);
+router.get("/tags", getSkillTags);
+router.get("/:id", getSkillById);
+router.put("/:id", authorize("admin"), updateSkill);
+router.get("/", getSkills);
 
 export default router;
