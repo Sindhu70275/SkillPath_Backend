@@ -25,7 +25,7 @@ const enrollmentSchema = new mongoose.Schema(
 );
 
 // Prevents duplicate user-skill pair
-enrollmentSchema.index({ user: 1, skill: 1 }, { unique: true });
+enrollmentSchema.index({ userId: 1, skillId: 1 }, { unique: true });
 
 const Enrollment = mongoose.model("Enrollment", enrollmentSchema);
 
