@@ -74,6 +74,7 @@ export const addToWishlistService = async (userId, skillId) => {
     userId,
     skillId,
     status: "wishlisted",
+    enrolledAt: new Date(),
   });
 
   return wishlist;
@@ -106,7 +107,7 @@ export const getUserDashboardService = async (userId, filter = {}) => {
     if (item.status === "enrolled") {
       enrolled.push(item.skillId);
     } else if (item.status === "wishlisted") {
-      wishlisted.push(item.skillId);
+      wishlisted.push({ ...item.skillId, wishlistedAt: item.enrolledAt });
     }
   });
 
