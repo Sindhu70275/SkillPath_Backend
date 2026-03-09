@@ -1,4 +1,5 @@
 import Skill from "../models/skill.model.js";
+import Enrollment from "../models/enrollment.model.js";
 
 export const createSkillService = async (skillData) => {
   const existingSkill = await Skill.findOne({ title: skillData.title });
@@ -17,7 +18,7 @@ export const updateSkillService = async (id, updateData) => {
   return updatedSkill;
 };
 
-export const getSkillsService = async (query) => {
+export const getSkillsService = async (query, userId) => {
   const { category, level, search, tags } = query;
   const filter = {};
 
@@ -39,8 +40,21 @@ export const getSkillsService = async (query) => {
     filter.tags = { $all: tagsArray };
   }
 
-  const skills = await Skill.find(filter).sort({ createdAt: -1 });
-  return skills;
+  const skills = await Skill.find(filter).sort({ createdAt: -1 }).lean();
+
+  let enrollmentMap = new Map();
+  if (userId) {
+    const enrollments = await Enrollment.find({ userId }).lean();
+    enrollmentMap = new Map(
+      enrollments.map((e) => [e.skillId.toString(), e.status]),
+    );
+  }
+
+  return skills.map((skill) => ({
+    ...skill,
+    isEnrolled: enrollmentMap.get(skill._id.toString()) === "enrolled",
+    isWishlisted: enrollmentMap.get(skill._id.toString()) === "wishlisted",
+  }));
 };
 
 export const getSkillByIdService = async (id) => {
