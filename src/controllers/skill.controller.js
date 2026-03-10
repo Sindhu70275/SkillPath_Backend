@@ -44,7 +44,7 @@ export const updateSkill = async (req, res, next) => {
 
 export const getSkills = async (req, res, next) => {
   try {
-    const skills = await getSkillsService(req.query);
+    const skills = await getSkillsService(req.query, req.user.id);
 
     res.status(200).json({
       data: skills,

@@ -8,6 +8,8 @@ import errorHandler from "./src/middlewares/error.errorHandler.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
 import enrollmentRoutes from "./src/routes/enrollment.routes.js";
+import moduleRoutes from "./src/routes/module.routes.js";
+import lessonRoutes from "./src/routes/lesson.routes.js";
 
 dotenv.config();
 connectDB();
@@ -30,5 +32,7 @@ app.listen(PORT, () => {
 app.use("/api/auth", authRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api", enrollmentRoutes);
+app.use("/api/modules", moduleRoutes);
+app.use("/api/lessons", lessonRoutes);
 
 app.use(errorHandler);

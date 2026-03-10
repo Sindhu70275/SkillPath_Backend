@@ -26,6 +26,8 @@ const skillSchema = new mongoose.Schema(
     },
     tags: [String],
     durationInHours: Number,
+    modulesCount: Number,
+    lessonsCount: Number,
     modules: [
       {
         title: String,
