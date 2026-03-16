@@ -1,5 +1,6 @@
 import Module from "../models/module.model.js";
 import Skill from "../models/skill.model.js";
+import { getLastActiveLessonBySkillService } from "../services/lessonProgress.service.js";
 
 export const createModuleService = async (moduleData) => {
   const skill = await Skill.findById(moduleData.skillId);
@@ -25,15 +26,22 @@ export const getModuleByIdService = async (id) => {
   return module;
 };
 
-export const getModulesBySkillIdService = async (skillId) => {
+export const getModulesBySkillIdService = async (skillId, userId) => {
   const skill = await Skill.findById(skillId)
     .select("title category durationInHours level description modulesCount lessonsCount")
     .lean();
   const modules = await Module.find({ skillId }).sort({ order: 1 }).lean();
 
+  const lastActiveLesson = await getLastActiveLessonBySkillService(userId, skillId);
+
   return {
     skill,
     modules,
+    lastActiveLesson: lastActiveLesson ? {
+      lessonId: lastActiveLesson.lessonId._id,
+      moduleId: lastActiveLesson.lessonId.moduleId._id,
+      lastWatchedAt: lastActiveLesson.lastWatchedAt
+    } : null,
   };
 };
 

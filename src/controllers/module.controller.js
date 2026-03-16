@@ -46,7 +46,7 @@ export const getModuleById = async (req, res, next) => {
 export const getModulesBySkillId = async (req, res, next) => {
   try {
     const { skillId } = req.params;
-    const modules = await getModulesBySkillIdService(skillId);
+    const modules = await getModulesBySkillIdService(skillId, req.user.id);
 
     res.status(200).json({
       status: "success",

@@ -45,7 +45,7 @@ export const getLessonById = async (req, res, next) => {
 export const getLessonsByModuleId = async (req, res, next) => {
   try {
     const { moduleId } = req.params;
-    const lessons = await getLessonsByModuleIdService(moduleId);
+    const lessons = await getLessonsByModuleIdService(moduleId, req.user.id);
 
     res.status(200).json({
       status: "success",
