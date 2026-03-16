@@ -23,7 +23,7 @@ export const getLessonProgressController = async (req, res, next) => {
 
 export const updateLessonProgressController = async (req, res, next) => {
   try {
-    const { lessonId } = req.params;
+    const { lessonId, skillId } = req.params;
     const { progressPercentage, lastWatchedSecond } = req.body;
     const userId = req.user.id;
 
@@ -36,6 +36,7 @@ export const updateLessonProgressController = async (req, res, next) => {
 
     const progress = await updateLessonProgressService(
       userId,
+      skillId,
       lessonId,
       progressPercentage,
       lastWatchedSecond,
@@ -53,10 +54,10 @@ export const updateLessonProgressController = async (req, res, next) => {
 
 export const markLessonCompleteController = async (req, res, next) => {
   try {
-    const { lessonId } = req.params;
+    const { lessonId, skillId } = req.params;
     const userId = req.user.id;
 
-    const progress = await markLessonCompleteService(userId, lessonId);
+    const progress = await markLessonCompleteService(userId, skillId, lessonId);
 
     res.status(200).json({
       status: "success",

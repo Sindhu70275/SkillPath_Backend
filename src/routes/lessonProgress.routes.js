@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 router.get("/lesson/:skillId", getLessonProgressController);
-router.put("/lesson/:lessonId", updateLessonProgressController);
-router.put("/lesson/:lessonId/complete", markLessonCompleteController);
+router.put("/:skillId/lesson/:lessonId", updateLessonProgressController);
+router.put("/:skillId/lesson/:lessonId/complete", markLessonCompleteController);
 
 export default router;

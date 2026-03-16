@@ -1,5 +1,6 @@
 import Lesson from "../models/lesson.model.js";
 import Module from "../models/module.model.js";
+import LessonProgress from "../models/lessonProgress.model.js";
 
 export const createLessonService = async (lessonData) => {
   const module = await Module.findById(lessonData.moduleId);
@@ -25,9 +26,24 @@ export const getLessonByIdService = async (id) => {
   return lesson;
 };
 
-export const getLessonsByModuleIdService = async (moduleId) => {
+export const getLessonsByModuleIdService = async (moduleId, userId) => {
   const lessons = await Lesson.find({ moduleId }).sort({ order: 1 }).lean();
-  return lessons;
+
+  const progress = await LessonProgress.find({
+    userId,
+    lessonId: { $in: lessons.map((l) => l._id) },
+  }).lean();
+
+  const progressMap = progress.reduce((acc, p) => {
+    acc[p.lessonId.toString()] = p;
+    return acc;
+  }, {});
+
+  return lessons.map((l) => ({
+    ...l,
+    isCompleted: progressMap[l._id]?.isCompleted || false,
+    progressPercentage: progressMap[l._id]?.progressPercentage || 0,
+  }));
 };
 
 export const updateLessonService = async (id, updateData) => {

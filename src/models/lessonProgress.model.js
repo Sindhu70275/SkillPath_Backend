@@ -8,6 +8,12 @@ const lessonProgressSchema = new mongoose.Schema(
       required: true,
     },
 
+    skillId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skill",
+      required: true,
+    },
+
     lessonId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Lesson",
@@ -36,7 +42,11 @@ const lessonProgressSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-lessonProgressSchema.index({ userId: 1, lessonId: 1 }, { unique: true });
+lessonProgressSchema.index(
+  { userId: 1, skillId: 1, lessonId: 1 },
+  { unique: true },
+);
+lessonProgressSchema.index({ userId: 1, skillId: 1, lastWatchedAt: -1 });
 const lessonProgress = mongoose.model("LessonProgress", lessonProgressSchema);
 
 export default lessonProgress;
