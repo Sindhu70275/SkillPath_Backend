@@ -1,4 +1,5 @@
 import Enrollment from "../models/enrollment.model.js";
+import lessonProgress from "../models/lessonProgress.model.js";
 import Skill from "../models/skill.model.js";
 import { AppError } from "../utils/AppError.js";
 
@@ -45,6 +46,8 @@ export const unenrollSkillService = async (userId, skillId) => {
   if (!enrollment || enrollment.status !== "enrolled") {
     throw new AppError("You are not enrolled in this skill", 400);
   }
+
+  await lessonProgress.deleteMany({ userId, skillId });
 
   await Enrollment.deleteOne({ _id: enrollment._id });
   return { message: "Unenrolled successfully" };
