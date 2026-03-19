@@ -110,7 +110,7 @@ export const getUserDashboardService = async (userId, filter = {}) => {
 
   enrollments.forEach((item) => {
     if (item.status === "enrolled") {
-      enrolled.push(item.skillId);
+      enrolled.push({ ...item.skillId, overallPercentage: item.overallPercentage });
     } else if (item.status === "wishlisted") {
       wishlisted.push({ ...item.skillId, wishlistedAt: item.enrolledAt });
     }

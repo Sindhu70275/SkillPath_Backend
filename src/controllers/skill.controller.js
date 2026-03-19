@@ -57,7 +57,7 @@ export const getSkills = async (req, res, next) => {
 export const getSkillById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const skillDetails = await getSkillByIdService(id);
+    const skillDetails = await getSkillByIdService(id, req.user?.id);
 
     if (skillDetails) {
       res.status(200).json({

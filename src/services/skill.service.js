@@ -57,9 +57,24 @@ export const getSkillsService = async (query, userId) => {
   }));
 };
 
-export const getSkillByIdService = async (id) => {
-  const skillDetail = await Skill.findById(id);
-  return skillDetail;
+export const getSkillByIdService = async (id, userId) => {
+  const skill = await Skill.findById(id);
+  if (!skill) return null;
+
+  let isEnrolled = false;
+  if (userId) {
+    const enrollment = await Enrollment.findOne({
+      userId,
+      skillId: id,
+      status: "enrolled"
+    }).lean();
+    isEnrolled = !!enrollment;
+  }
+
+  return {
+    ...skill.toObject(),
+    isEnrolled
+  };
 };
 
 export const getSkillTagsService = async () => {
