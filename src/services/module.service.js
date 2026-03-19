@@ -1,6 +1,6 @@
 import Module from "../models/module.model.js";
 import Skill from "../models/skill.model.js";
-import { getLastActiveLessonBySkillService } from "../services/lessonProgress.service.js";
+import Enrollment from "../models/enrollment.model.js";
 
 export const createModuleService = async (moduleData) => {
   const skill = await Skill.findById(moduleData.skillId);
@@ -28,20 +28,29 @@ export const getModuleByIdService = async (id) => {
 
 export const getModulesBySkillIdService = async (skillId, userId) => {
   const skill = await Skill.findById(skillId)
-    .select("title category durationInHours level description modulesCount lessonsCount")
+    .select(
+      "title category durationInHours level description modulesCount lessonsCount",
+    )
     .lean();
   const modules = await Module.find({ skillId }).sort({ order: 1 }).lean();
 
-  const lastActiveLesson = await getLastActiveLessonBySkillService(userId, skillId);
+  const enrollment = await Enrollment.findOne({ userId, skillId })
+    .select("lastAccessedLessonId lastAccessedModuleId overallPercentage")
+    .lean();
+
+  let lastActiveLesson = null;
+  if (enrollment?.lastAccessedLessonId && enrollment?.lastAccessedModuleId) {
+    lastActiveLesson = {
+      lessonId: enrollment.lastAccessedLessonId,
+      moduleId: enrollment.lastAccessedModuleId,
+    };
+  }
 
   return {
     skill,
     modules,
-    lastActiveLesson: lastActiveLesson ? {
-      lessonId: lastActiveLesson.lessonId._id,
-      moduleId: lastActiveLesson.lessonId.moduleId._id,
-      lastWatchedAt: lastActiveLesson.lastWatchedAt
-    } : null,
+    lastActiveLesson,
+    overallPercentage: enrollment?.overallPercentage || 0,
   };
 };
 
