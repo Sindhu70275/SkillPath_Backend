@@ -1,6 +1,7 @@
 import Lesson from "../models/lesson.model.js";
 import LessonProgress from "../models/lessonProgress.model.js";
 import { AppError } from "../utils/AppError.js";
+import Enrollment from "../models/enrollment.model.js";
 
 export const getLessonProgressService = async (userId, skillId) => {
   const lessons = await Lesson.find({ skillId }).select("_id").lean();
@@ -21,7 +22,9 @@ export const updateLessonProgressService = async (
   progressPercentage,
   lastWatchedSecond,
 ) => {
-  const lesson = await Lesson.findOne({ _id: lessonId, skillId });
+  const lesson = await Lesson.findOne({ _id: lessonId, skillId }).populate(
+    "moduleId",
+  );
   if (!lesson) {
     throw new AppError("Lesson not found for the given skill", 404);
   }
@@ -31,6 +34,7 @@ export const updateLessonProgressService = async (
     {
       progressPercentage,
       lastWatchedSecond,
+      lastWatchedAt: new Date(),
     },
     {
       upsert: true,
@@ -38,14 +42,27 @@ export const updateLessonProgressService = async (
     },
   );
 
+  await Enrollment.findOneAndUpdate(
+    { userId, skillId },
+    {
+      lastAccessedLessonId: lessonId,
+      lastAccessedModuleId: lesson.moduleId._id,
+    },
+  );
+
   return progress;
 };
 
 export const markLessonCompleteService = async (userId, skillId, lessonId) => {
-  const lesson = await Lesson.findOne({ _id: lessonId, skillId });
+  const lesson = await Lesson.findOne({ _id: lessonId, skillId }).populate(
+    "moduleId",
+  );
   if (!lesson) {
     throw new AppError("Lesson not found for the given skill", 404);
   }
+
+  const existingProgress = await LessonProgress.findOne({ userId, skillId, lessonId });
+  const wasNotCompleted = !existingProgress?.isCompleted || !existingProgress;
 
   const progress = await LessonProgress.findOneAndUpdate(
     { userId, skillId, lessonId },
@@ -60,27 +77,24 @@ export const markLessonCompleteService = async (userId, skillId, lessonId) => {
     },
   );
 
-  return progress;
-};
+  const updateData = {
+    lastAccessedLessonId: lessonId,
+    lastAccessedModuleId: lesson.moduleId._id,
+  };
+  if (wasNotCompleted) {
+    updateData.$inc = { lessonsCompleted: 1 };
+  }
 
-export const getLastActiveLessonBySkillService = async (userId, skillId) => {
-  const progress = await LessonProgress.findOne({
-    userId,
-    skillId,
-    lastWatchedAt: { $ne: null },
-  })
-    .sort({ lastWatchedAt: -1 })
-    .populate({
-      path: "lessonId",
-      populate: {
-        path: "moduleId",
-        select: "title",
-      },
-      match: { skillId },
-    })
-    .lean();
+  const enrollment = await Enrollment.findOneAndUpdate(
+    { userId, skillId },
+    updateData,
+    { new: true }
+  );
 
-  if (!progress?.lessonId) return null;
+  if (wasNotCompleted && enrollment.totalLessons > 0) {
+    enrollment.overallPercentage = Math.round((enrollment.lessonsCompleted / enrollment.totalLessons) * 100);
+    await enrollment.save();
+  }
 
-  return progress;
+  return { progress, enrollment };
 };
