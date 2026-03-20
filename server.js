@@ -21,14 +21,18 @@ const allowedOrigins = process.env.CORS_ORIGINS.split(",");
 
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // allows cookies to be sent in cross-origin requests
   }),
 );
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/skills", skillRoutes);
@@ -38,3 +42,7 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/progress", lessonProgressRoutes);
 
 app.use(errorHandler);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
