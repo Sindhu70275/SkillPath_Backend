@@ -1,11 +1,12 @@
 import Module from "../models/module.model.js";
 import Skill from "../models/skill.model.js";
 import Enrollment from "../models/enrollment.model.js";
+import { AppError } from "../utils/AppError.js";
 
 export const createModuleService = async (moduleData) => {
   const skill = await Skill.findById(moduleData.skillId);
   if (!skill) {
-    throw new Error("Skill not found");
+    throw new AppError("Skill not found", 404);
   }
 
   const existingModule = await Module.findOne({
@@ -14,10 +15,15 @@ export const createModuleService = async (moduleData) => {
   });
 
   if (existingModule) {
-    throw new Error("Module with this order already exists for this skill");
+    throw new AppError("Module with this order already exists for this skill", 400);
   }
 
   const module = await Module.create(moduleData);
+
+  await Skill.findByIdAndUpdate(moduleData.skillId, {
+    $inc: { modulesCount: 1 },
+  });
+
   return module;
 };
 
@@ -62,6 +68,14 @@ export const updateModuleService = async (id, updateData) => {
 };
 
 export const deleteModuleService = async (id) => {
-  const module = await Module.findByIdAndDelete(id);
+  const module = await Module.findById(id);
+  if (!module) return null;
+
+  await Module.findByIdAndDelete(id);
+
+  await Skill.findByIdAndUpdate(module.skillId, {
+    $inc: { modulesCount: -1 },
+  });
+
   return module;
 };
