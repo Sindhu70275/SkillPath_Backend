@@ -37,7 +37,11 @@ const skillSchema = new mongoose.Schema(
     ],
     prerequisites: [String],
     learningOutcomes: [String],
-    enrolledCount: {
+    totalEnrollments: {
+      type: Number,
+      default: 0,
+    },
+    activeEnrollments: {
       type: Number,
       default: 0,
     },

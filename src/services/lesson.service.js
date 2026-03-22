@@ -1,6 +1,7 @@
 import Lesson from "../models/lesson.model.js";
 import Module from "../models/module.model.js";
 import LessonProgress from "../models/lessonProgress.model.js";
+import Skill from "../models/skill.model.js";
 
 export const createLessonService = async (lessonData) => {
   const module = await Module.findById(lessonData.moduleId);
@@ -18,6 +19,11 @@ export const createLessonService = async (lessonData) => {
   }
 
   const lesson = await Lesson.create(lessonData);
+
+  await Skill.findByIdAndUpdate(lessonData.skillId, {
+    $inc: { lessonsCount: 1 },
+  });
+
   return lesson;
 };
 
@@ -54,6 +60,14 @@ export const updateLessonService = async (id, updateData) => {
 };
 
 export const deleteLessonService = async (id) => {
-  const lesson = await Lesson.findByIdAndDelete(id);
+  const lesson = await Lesson.findById(id);
+  if (!lesson) return null;
+
+  await Lesson.findByIdAndDelete(id);
+
+  await Skill.findByIdAndUpdate(lesson.skillId, {
+    $inc: { lessonsCount: -1 },
+  });
+
   return lesson;
 };
