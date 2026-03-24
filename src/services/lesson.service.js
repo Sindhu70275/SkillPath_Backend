@@ -2,11 +2,12 @@ import Lesson from "../models/lesson.model.js";
 import Module from "../models/module.model.js";
 import LessonProgress from "../models/lessonProgress.model.js";
 import Skill from "../models/skill.model.js";
+import { AppError } from "../utils/AppError.js";
 
 export const createLessonService = async (lessonData) => {
   const module = await Module.findById(lessonData.moduleId);
   if (!module) {
-    throw new Error("Module not found");
+    throw new AppError("Module not found", 404);
   }
 
   const existingLesson = await Lesson.findOne({
@@ -15,7 +16,10 @@ export const createLessonService = async (lessonData) => {
   });
 
   if (existingLesson) {
-    throw new Error("Lesson with this order already exists for this module");
+    throw new AppError(
+      "Lesson with this order already exists for this module",
+      400,
+    );
   }
 
   const lesson = await Lesson.create(lessonData);

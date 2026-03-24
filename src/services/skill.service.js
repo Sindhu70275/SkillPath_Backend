@@ -40,7 +40,7 @@ export const getSkillsService = async (query, userId) => {
     filter.tags = { $all: tagsArray };
   }
 
-  const skills = await Skill.find(filter).sort({ createdAt: -1 }).lean();
+  const skills = await Skill.find(filter).sort({ createdAt: 1 }).lean();
 
   let enrollmentMap = new Map();
   if (userId) {

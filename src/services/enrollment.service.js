@@ -21,7 +21,6 @@ export const enrollSkillService = async (userId, skillId) => {
     if (existing?.status === "wishlisted") {
       existing.status = "enrolled";
       existing.enrolledAt = new Date();
-      existing.totalLessons = skill.lessonsCount || 0;
       await existing.save({ session });
 
       await Skill.updateOne(
@@ -39,7 +38,6 @@ export const enrollSkillService = async (userId, skillId) => {
             skillId,
             status: "enrolled",
             enrolledAt: new Date(),
-            totalLessons: skill.lessonsCount || 0,
           },
         ],
         { session },

@@ -34,10 +34,6 @@ const enrollmentSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    totalLessons: {
-      type: Number,
-      default: 0,
-    },
     overallPercentage: {
       type: Number,
       default: 0,

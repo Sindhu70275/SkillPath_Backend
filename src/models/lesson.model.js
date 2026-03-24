@@ -31,17 +31,12 @@ const lessonSchema = new mongoose.Schema(
 );
 
 // Middleware: auto-populate skillId from module
-lessonSchema.pre("save", async function (next) {
-  if (!this.isModified("moduleId")) return next();
+lessonSchema.pre("save", async function () {
+  if (!this.isModified("moduleId")) return;
 
-  try {
-    const module = await Module.findById(this.moduleId).select("skillId");
-    if (module) {
-      this.skillId = module.skillId;
-    }
-    next();
-  } catch (err) {
-    next(err);
+  const module = await Module.findById(this.moduleId).select("skillId");
+  if (module) {
+    this.skillId = module.skillId;
   }
 });
 
