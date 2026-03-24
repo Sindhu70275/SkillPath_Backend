@@ -1,5 +1,6 @@
 import Lesson from "../models/lesson.model.js";
 import LessonProgress from "../models/lessonProgress.model.js";
+import Skill from "../models/skill.model.js";
 import { AppError } from "../utils/AppError.js";
 import Enrollment from "../models/enrollment.model.js";
 
@@ -61,7 +62,11 @@ export const markLessonCompleteService = async (userId, skillId, lessonId) => {
     throw new AppError("Lesson not found for the given skill", 404);
   }
 
-  const existingProgress = await LessonProgress.findOne({ userId, skillId, lessonId });
+  const existingProgress = await LessonProgress.findOne({
+    userId,
+    skillId,
+    lessonId,
+  });
   const wasNotCompleted = !existingProgress?.isCompleted || !existingProgress;
 
   const progress = await LessonProgress.findOneAndUpdate(
@@ -88,12 +93,21 @@ export const markLessonCompleteService = async (userId, skillId, lessonId) => {
   const enrollment = await Enrollment.findOneAndUpdate(
     { userId, skillId },
     updateData,
-    { new: true }
+    { new: true },
   );
 
-  if (wasNotCompleted && enrollment.totalLessons > 0) {
-    enrollment.overallPercentage = Math.round((enrollment.lessonsCompleted / enrollment.totalLessons) * 100);
-    await enrollment.save();
+  if (wasNotCompleted) {
+    const skill = await Skill.findById(skillId).select("lessonsCount");
+    const totalLessons = skill ? skill.lessonsCount : 0;
+    const overallPercentage =
+      totalLessons > 0
+        ? Math.round((enrollment.lessonsCompleted / totalLessons) * 100)
+        : 0;
+
+    await Enrollment.findOneAndUpdate(
+      { userId, skillId },
+      { overallPercentage },
+    );
   }
 
   return { progress, enrollment };

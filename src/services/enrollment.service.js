@@ -21,7 +21,6 @@ export const enrollSkillService = async (userId, skillId) => {
     if (existing?.status === "wishlisted") {
       existing.status = "enrolled";
       existing.enrolledAt = new Date();
-      existing.totalLessons = skill.lessonsCount || 0;
       await existing.save({ session });
 
       await Skill.updateOne(
@@ -39,7 +38,6 @@ export const enrollSkillService = async (userId, skillId) => {
             skillId,
             status: "enrolled",
             enrolledAt: new Date(),
-            totalLessons: skill.lessonsCount || 0,
           },
         ],
         { session },
@@ -123,7 +121,10 @@ export const removeFromWishlistService = async (userId, skillId) => {
 
 export const getUserDashboardService = async (userId, filter = {}) => {
   const enrollments = await Enrollment.find({ userId })
-    .populate("skillId")
+     .populate({
+      path: "skillId",
+      select: "title image lessonsCount", 
+    })
     .lean();
 
   const enrolled = [];
@@ -134,6 +135,7 @@ export const getUserDashboardService = async (userId, filter = {}) => {
       enrolled.push({
         ...item.skillId,
         overallPercentage: item.overallPercentage,
+        lessonsCompleted: item.lessonsCompleted
       });
     } else if (item.status === "wishlisted") {
       wishlisted.push({ ...item.skillId, wishlistedAt: item.enrolledAt });
