@@ -3,6 +3,7 @@ import Module from "../models/module.model.js";
 import LessonProgress from "../models/lessonProgress.model.js";
 import Skill from "../models/skill.model.js";
 import { AppError } from "../utils/AppError.js";
+import { transactionWrapper } from "../utils/transactionWrapper.js";
 
 export const createLessonService = async (lessonData) => {
   const module = await Module.findById(lessonData.moduleId);
@@ -22,13 +23,27 @@ export const createLessonService = async (lessonData) => {
     );
   }
 
-  const lesson = await Lesson.create(lessonData);
+  return await transactionWrapper(async (session) => {
+    const lesson = await Lesson.create([lessonData], { session });
 
-  await Skill.findByIdAndUpdate(lessonData.skillId, {
-    $inc: { lessonsCount: 1 },
+    await Skill.findByIdAndUpdate(
+      lessonData.skillId,
+      {
+        $inc: { lessonsCount: 1 },
+      },
+      { session },
+    );
+
+    await Module.findByIdAndUpdate(
+      lessonData.moduleId,
+      {
+        $inc: { durationInMinutes: lesson[0].durationInMinutes },
+      },
+      { session },
+    );
+
+    return lesson[0];
   });
-
-  return lesson;
 };
 
 export const getLessonByIdService = async (id) => {
@@ -57,21 +72,59 @@ export const getLessonsByModuleIdService = async (moduleId, userId) => {
 };
 
 export const updateLessonService = async (id, updateData) => {
-  const updatedLesson = await Lesson.findByIdAndUpdate(id, updateData, {
-    new: true,
+  const oldLesson = await Lesson.findById(id).select(
+    "durationInMinutes moduleId",
+  );
+  if (!oldLesson) return null;
+
+  const oldDuration = oldLesson.durationInMinutes;
+  const newDuration = updateData.durationInMinutes;
+  const delta = newDuration - oldDuration;
+  const moduleId = oldLesson.moduleId;
+
+  return await transactionWrapper(async (session) => {
+    const updatedLesson = await Lesson.findByIdAndUpdate(id, updateData, {
+      new: true,
+      session,
+    });
+
+    if (delta !== 0 && moduleId) {
+      await Module.findByIdAndUpdate(
+        moduleId,
+        {
+          $inc: { durationInMinutes: delta },
+        },
+        { session },
+      );
+    }
+
+    return updatedLesson;
   });
-  return updatedLesson;
 };
 
 export const deleteLessonService = async (id) => {
   const lesson = await Lesson.findById(id);
   if (!lesson) return null;
 
-  await Lesson.findByIdAndDelete(id);
+  return await transactionWrapper(async (session) => {
+    await Lesson.findByIdAndDelete(id, { session });
 
-  await Skill.findByIdAndUpdate(lesson.skillId, {
-    $inc: { lessonsCount: -1 },
+    await Skill.findByIdAndUpdate(
+      lesson.skillId,
+      {
+        $inc: { lessonsCount: -1 },
+      },
+      { session },
+    );
+
+    await Module.findByIdAndUpdate(
+      lesson.moduleId,
+      {
+        $inc: { durationInMinutes: -lesson.durationInMinutes },
+      },
+      { session },
+    );
+
+    return lesson;
   });
-
-  return lesson;
 };
