@@ -37,7 +37,7 @@ export const createLessonService = async (lessonData) => {
     await Module.findByIdAndUpdate(
       lessonData.moduleId,
       {
-        $inc: { durationInMinutes: lesson[0].durationInMinutes },
+        $inc: { durationInSecs: lesson[0].durationInSecs },
       },
       { session },
     );
@@ -72,13 +72,11 @@ export const getLessonsByModuleIdService = async (moduleId, userId) => {
 };
 
 export const updateLessonService = async (id, updateData) => {
-  const oldLesson = await Lesson.findById(id).select(
-    "durationInMinutes moduleId",
-  );
+  const oldLesson = await Lesson.findById(id).select("durationInSecs moduleId");
   if (!oldLesson) return null;
 
-  const oldDuration = oldLesson.durationInMinutes;
-  const newDuration = updateData.durationInMinutes;
+  const oldDuration = oldLesson.durationInSecs;
+  const newDuration = updateData.durationInSecs;
   const delta = newDuration - oldDuration;
   const moduleId = oldLesson.moduleId;
 
@@ -92,7 +90,7 @@ export const updateLessonService = async (id, updateData) => {
       await Module.findByIdAndUpdate(
         moduleId,
         {
-          $inc: { durationInMinutes: delta },
+          $inc: { durationInSecs: delta },
         },
         { session },
       );
@@ -120,7 +118,7 @@ export const deleteLessonService = async (id) => {
     await Module.findByIdAndUpdate(
       lesson.moduleId,
       {
-        $inc: { durationInMinutes: -lesson.durationInMinutes },
+        $inc: { durationInSecs: -lesson.durationInSecs },
       },
       { session },
     );
