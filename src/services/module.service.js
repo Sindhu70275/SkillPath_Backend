@@ -2,6 +2,7 @@ import Module from "../models/module.model.js";
 import Skill from "../models/skill.model.js";
 import Enrollment from "../models/enrollment.model.js";
 import { AppError } from "../utils/AppError.js";
+import { transactionWrapper } from "../utils/transactionWrapper.js";
 
 export const createModuleService = async (moduleData) => {
   const skill = await Skill.findById(moduleData.skillId);
@@ -15,16 +16,28 @@ export const createModuleService = async (moduleData) => {
   });
 
   if (existingModule) {
-    throw new AppError("Module with this order already exists for this skill", 400);
+    throw new AppError(
+      "Module with this order already exists for this skill",
+      400,
+    );
   }
 
-  const module = await Module.create(moduleData);
+  return await transactionWrapper(async (session) => {
+    const module = await Module.create([moduleData], { session });
 
-  await Skill.findByIdAndUpdate(moduleData.skillId, {
-    $inc: { modulesCount: 1 },
+    await Skill.findByIdAndUpdate(
+      moduleData.skillId,
+      {
+        $inc: {
+          modulesCount: 1,
+          durationInSecs: module[0].durationInSecs,
+        },
+      },
+      { session },
+    );
+
+    return module[0];
   });
-
-  return module;
 };
 
 export const getModuleByIdService = async (id) => {
@@ -61,21 +74,52 @@ export const getModulesBySkillIdService = async (skillId, userId) => {
 };
 
 export const updateModuleService = async (id, updateData) => {
-  const updatedModule = await Module.findByIdAndUpdate(id, updateData, {
-    new: true,
+  const oldModule = await Module.findById(id).select("durationInSecs skillId");
+  if (!oldModule) return null;
+
+  const oldDuration = oldModule.durationInSecs;
+  const newDuration = updateData.durationInSecs;
+  const delta = newDuration - oldDuration;
+  const skillId = oldModule.skillId;
+
+  return await transactionWrapper(async (session) => {
+    const updatedModule = await Module.findByIdAndUpdate(id, updateData, {
+      new: true,
+      session,
+    });
+
+    if (delta !== 0 && skillId) {
+      await Skill.findByIdAndUpdate(
+        skillId,
+        {
+          $inc: { durationInSecs: delta },
+        },
+        { session },
+      );
+    }
+
+    return updatedModule;
   });
-  return updatedModule;
 };
 
 export const deleteModuleService = async (id) => {
   const module = await Module.findById(id);
   if (!module) return null;
 
-  await Module.findByIdAndDelete(id);
+  return await transactionWrapper(async (session) => {
+    await Module.findByIdAndDelete(id, { session });
 
-  await Skill.findByIdAndUpdate(module.skillId, {
-    $inc: { modulesCount: -1 },
+    await Skill.findByIdAndUpdate(
+      module.skillId,
+      {
+        $inc: {
+          modulesCount: -1,
+          durationInSecs: -module.durationInSecs,
+        },
+      },
+      { session },
+    );
+
+    return module;
   });
-
-  return module;
 };

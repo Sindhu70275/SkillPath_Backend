@@ -25,7 +25,10 @@ const skillSchema = new mongoose.Schema(
       required: true,
     },
     tags: [String],
-    durationInHours: Number,
+    durationInSecs: {
+      type: Number,
+      default: 0,
+    },
     modulesCount: Number,
     lessonsCount: Number,
     modules: [
