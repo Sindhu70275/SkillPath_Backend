@@ -29,7 +29,10 @@ export const createLessonService = async (lessonData) => {
     await Skill.findByIdAndUpdate(
       lessonData.skillId,
       {
-        $inc: { lessonsCount: 1 },
+        $inc: {
+          lessonsCount: 1,
+          durationInSecs: lesson[0].durationInSecs,
+        },
       },
       { session },
     );
@@ -72,13 +75,16 @@ export const getLessonsByModuleIdService = async (moduleId, userId) => {
 };
 
 export const updateLessonService = async (id, updateData) => {
-  const oldLesson = await Lesson.findById(id).select("durationInSecs moduleId");
+  const oldLesson = await Lesson.findById(id).select(
+    "durationInSecs moduleId skillId",
+  );
   if (!oldLesson) return null;
 
   const oldDuration = oldLesson.durationInSecs;
   const newDuration = updateData.durationInSecs;
   const delta = newDuration - oldDuration;
   const moduleId = oldLesson.moduleId;
+  const skillId = oldLesson.skillId;
 
   return await transactionWrapper(async (session) => {
     const updatedLesson = await Lesson.findByIdAndUpdate(id, updateData, {
@@ -86,14 +92,25 @@ export const updateLessonService = async (id, updateData) => {
       session,
     });
 
-    if (delta !== 0 && moduleId) {
-      await Module.findByIdAndUpdate(
-        moduleId,
-        {
-          $inc: { durationInSecs: delta },
-        },
-        { session },
-      );
+    if (delta !== 0) {
+      if (moduleId) {
+        await Module.findByIdAndUpdate(
+          moduleId,
+          {
+            $inc: { durationInSecs: delta },
+          },
+          { session },
+        );
+      }
+      if (skillId) {
+        await Skill.findByIdAndUpdate(
+          skillId,
+          {
+            $inc: { durationInSecs: delta },
+          },
+          { session },
+        );
+      }
     }
 
     return updatedLesson;
@@ -110,7 +127,10 @@ export const deleteLessonService = async (id) => {
     await Skill.findByIdAndUpdate(
       lesson.skillId,
       {
-        $inc: { lessonsCount: -1 },
+        $inc: {
+          lessonsCount: -1,
+          durationInSecs: -lesson.durationInSecs,
+        },
       },
       { session },
     );

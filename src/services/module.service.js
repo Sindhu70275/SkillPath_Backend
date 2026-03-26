@@ -28,10 +28,7 @@ export const createModuleService = async (moduleData) => {
     await Skill.findByIdAndUpdate(
       moduleData.skillId,
       {
-        $inc: {
-          modulesCount: 1,
-          durationInSecs: module[0].durationInSecs,
-        },
+        $inc: { modulesCount: 1 },
       },
       { session },
     );
@@ -48,7 +45,7 @@ export const getModuleByIdService = async (id) => {
 export const getModulesBySkillIdService = async (skillId, userId) => {
   const skill = await Skill.findById(skillId)
     .select(
-      "title category durationInHours level description modulesCount lessonsCount",
+      "title category level description modulesCount lessonsCount durationInSecs",
     )
     .lean();
   const modules = await Module.find({ skillId }).sort({ order: 1 }).lean();
@@ -74,32 +71,10 @@ export const getModulesBySkillIdService = async (skillId, userId) => {
 };
 
 export const updateModuleService = async (id, updateData) => {
-  const oldModule = await Module.findById(id).select("durationInSecs skillId");
-  if (!oldModule) return null;
-
-  const oldDuration = oldModule.durationInSecs;
-  const newDuration = updateData.durationInSecs;
-  const delta = newDuration - oldDuration;
-  const skillId = oldModule.skillId;
-
-  return await transactionWrapper(async (session) => {
-    const updatedModule = await Module.findByIdAndUpdate(id, updateData, {
-      new: true,
-      session,
-    });
-
-    if (delta !== 0 && skillId) {
-      await Skill.findByIdAndUpdate(
-        skillId,
-        {
-          $inc: { durationInSecs: delta },
-        },
-        { session },
-      );
-    }
-
-    return updatedModule;
+  const updatedModule = await Module.findByIdAndUpdate(id, updateData, {
+    new: true,
   });
+  return updatedModule;
 };
 
 export const deleteModuleService = async (id) => {
@@ -112,10 +87,7 @@ export const deleteModuleService = async (id) => {
     await Skill.findByIdAndUpdate(
       module.skillId,
       {
-        $inc: {
-          modulesCount: -1,
-          durationInSecs: -module.durationInSecs,
-        },
+        $inc: { modulesCount: -1 },
       },
       { session },
     );
