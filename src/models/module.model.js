@@ -14,7 +14,11 @@ const moduleSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  durationInMinutes: Number,
+  durationInSecs: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
 });
 
 const Module = mongoose.model("Module", moduleSchema);
