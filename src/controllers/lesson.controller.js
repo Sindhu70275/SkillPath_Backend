@@ -22,8 +22,9 @@ export const createLesson = async (req, res, next) => {
 
 export const getLessonById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const lesson = await getLessonByIdService(id);
+const { id } = req.params;
+    const userId = req.user?.id;
+    const lesson = await getLessonByIdService(id, userId);
 
     if (lesson) {
       res.status(200).json({

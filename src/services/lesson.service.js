@@ -49,9 +49,22 @@ export const createLessonService = async (lessonData) => {
   });
 };
 
-export const getLessonByIdService = async (id) => {
+export const getLessonByIdService = async (id, userId) => {
   const lesson = await Lesson.findById(id);
-  return lesson;
+  if (!lesson || !userId) {
+    return lesson;
+  }
+
+  const progress = await LessonProgress.findOne({
+    userId,
+    lessonId: id,
+  }).lean();
+
+  return {
+    ...lesson.toObject(),
+    isCompleted: progress?.isCompleted || false,
+    progressPercentage: progress?.progressPercentage || 0,
+  };
 };
 
 export const getLessonsByModuleIdService = async (moduleId, userId) => {
