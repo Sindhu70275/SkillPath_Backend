@@ -121,10 +121,11 @@ export const removeFromWishlistService = async (userId, skillId) => {
 
 export const getUserDashboardService = async (userId, filter = {}) => {
   const enrollments = await Enrollment.find({ userId })
-     .populate({
+    .populate({
       path: "skillId",
-      select: "title image lessonsCount", 
+      select: "title image lessonsCount",
     })
+    .sort({ enrolledAt: -1 })
     .lean();
 
   const enrolled = [];
@@ -135,7 +136,7 @@ export const getUserDashboardService = async (userId, filter = {}) => {
       enrolled.push({
         ...item.skillId,
         overallPercentage: item.overallPercentage,
-        lessonsCompleted: item.lessonsCompleted
+        lessonsCompleted: item.lessonsCompleted,
       });
     } else if (item.status === "wishlisted") {
       wishlisted.push({ ...item.skillId, wishlistedAt: item.enrolledAt });
