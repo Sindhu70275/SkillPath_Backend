@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  username: {
+  fullName: {
     type: String,
     required: true,
-    unique: true,
   },
   emailId: {
     type: String,
@@ -20,6 +19,10 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
+  userPhoto: {
+    type: String,
+    default: "",
+  }
 });
 
 export default mongoose.model("User", userSchema);

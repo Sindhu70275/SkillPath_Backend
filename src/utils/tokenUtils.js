@@ -4,7 +4,8 @@ export const generateAccessToken = (user) => {
 	const payload = {
 		id: user._id,
 		role: user.role,
-		name: user.username,
+		email: user.emailId,   
+        fullName: user.fullName,
 	};
 
 	return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -19,8 +20,9 @@ export const generateRefreshToken = (user) => {
 export const createUserData = (user) => {
 	return {
 		id: user._id,
-		username: user.username,
+		fullName: user.fullName,
 		emailId: user.emailId,
 		role: user.role,
+		userPhoto: user.userPhoto || "",
 	};
 };

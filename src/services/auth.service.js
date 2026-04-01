@@ -30,11 +30,7 @@ export const refreshTokenService = async (token) => {
   return newAccessToken;
 };
 
-export const registerService = async (username, emailId, password) => {
-  const existingUserByUsername = await User.findOne({ username });
-  if (existingUserByUsername) {
-    throw new AppError("Username already taken", 400);
-  }
+export const registerService = async (fullName, emailId, password) => {
   const existingUser = await User.findOne({ emailId });
   if (existingUser) {
     throw new AppError("Email already registered", 400);
@@ -42,7 +38,7 @@ export const registerService = async (username, emailId, password) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
-    username,
+    fullName,
     emailId,
     password: hashedPassword,
   });

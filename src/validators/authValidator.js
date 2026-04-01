@@ -1,17 +1,17 @@
 import Joi from "joi";
 
 export const registerSchema = Joi.object({
-  username: Joi.string()
-    .pattern(/^[a-zA-Z0-9_-]{6,20}$/) 
-    .min(6)
-    .max(20)
+  fullName: Joi.string()
+    .trim()
+    .min(3)
+    .max(50)
+    .pattern(/^[a-zA-Z\s]+$/i)
     .required()
     .messages({
-      "string.base": "Username must be a string",
-      "string.pattern.base": "Username can only contain letters, numbers, -, _",
-      "string.min": "Username must be at least 6 characters",
-      "string.max": "Username must be max 20 characters",
-      "any.required": "Username is required",
+      "any.required": "FULL_NAME_REQUIRED: \"Full name is required\"",
+      "string.min": "FULL_NAME_MIN_LENGTH: \"Full name must be at least 3 characters\"",
+      "string.max": "FULL_NAME_MAX_LENGTH: \"Full name must be max 50 characters\"",
+      "string.pattern.base": "FULL_NAME_PATTERN: \"Full name can only contain letters and spaces\"",
     }),
 
   emailId: Joi.string()
