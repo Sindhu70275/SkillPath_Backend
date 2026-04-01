@@ -22,10 +22,10 @@ export const refreshToken = async (req, res, next) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { username, emailId, password } = req.body;
+    const { fullName, emailId, password } = req.body;
 
     const { userData, token } = await registerService(
-      username,
+      fullName,
       emailId,
       password,
     );
