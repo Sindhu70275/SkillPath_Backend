@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const userStatsSchema = new mongoose.Schema(
   {
     userId: {

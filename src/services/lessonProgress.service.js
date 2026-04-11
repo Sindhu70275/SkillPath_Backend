@@ -3,6 +3,7 @@ import LessonProgress from "../models/lessonProgress.model.js";
 import Skill from "../models/skill.model.js";
 import { AppError } from "../utils/AppError.js";
 import Enrollment from "../models/enrollment.model.js";
+import { handleLessonCompletionStats } from "../services/userStats.service.js";
 
 export const getLessonProgressService = async (userId, skillId) => {
   const lessons = await Lesson.find({ skillId }).select("_id").lean();
@@ -109,6 +110,8 @@ export const markLessonCompleteService = async (userId, skillId, lessonId) => {
       { overallPercentage },
     );
   }
+
+  await handleLessonCompletionStats(userId);
 
   return { progress, enrollment };
 };
