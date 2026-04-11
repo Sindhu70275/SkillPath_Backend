@@ -12,6 +12,7 @@ import moduleRoutes from "./src/routes/module.routes.js";
 import lessonRoutes from "./src/routes/lesson.routes.js";
 import lessonProgressRoutes from "./src/routes/lessonProgress.routes.js";
 import profileRoutes from "./src/routes/profile.routes.js";
+import userStatsRoutes from "./src/routes/userStats.routes.js";
 
 dotenv.config();
 connectDB();
@@ -42,6 +43,7 @@ app.use("/api/modules", moduleRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/progress", lessonProgressRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/userStats", userStatsRoutes);
 
 app.use(errorHandler);
 
