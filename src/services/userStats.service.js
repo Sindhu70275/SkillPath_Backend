@@ -43,7 +43,7 @@ export const updateDailyStreak = (stats) => {
   return stats;
 };
 
-export const updateWeeklyProgress = (stats) => {
+export const updateWeeklyProgressService = (stats) => {
   const today = dayjs();
 
   if (today.isAfter(dayjs(stats.goalEndDate))) {
@@ -78,10 +78,17 @@ export const handleLessonCompletionStats = async (userId) => {
   return stats;
 };
 
-export const getUserStats = async (userId) => {
+export const getUserStatsService = async (userId) => {
   let stats = await UserStats.findOne({ userId });
   if (!stats) {
     stats = await createUserStats(userId);
   }
+  return stats;
+};
+
+export const updateWeeklyGoalService = async (userId, weeklyGoal) => {
+  const stats = await getUserStatsService(userId);
+  stats.weeklyGoal = weeklyGoal;
+  await stats.save();
   return stats;
 };
