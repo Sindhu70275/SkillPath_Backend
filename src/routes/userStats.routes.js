@@ -11,6 +11,6 @@ const router = express.Router();
 router.use(protect);
 
 router.get("/", getUserStats);
-router.post("/goal", validateBody(setWeeklyGoalSchema), updateWeeklyGoal);
+router.put("/goal", validateBody(setWeeklyGoalSchema), updateWeeklyGoal);
 
 export default router;
