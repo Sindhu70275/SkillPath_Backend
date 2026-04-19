@@ -4,6 +4,7 @@ import cors from "cors";
 
 import connectDB from "./src/config/db.js";
 import errorHandler from "./src/middlewares/error.errorHandler.js";
+import { initCronJobs } from "./src/cron/index.js";
 
 import authRoutes from "./src/routes/auth.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
@@ -49,4 +50,5 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  initCronJobs();
 });
