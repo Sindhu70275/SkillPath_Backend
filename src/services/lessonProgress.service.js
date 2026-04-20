@@ -115,3 +115,29 @@ export const markLessonCompleteService = async (userId, skillId, lessonId) => {
 
   return { progress, enrollment };
 };
+
+export const getLatestWatchedLessonService = async (userId) => {
+  const latestProgress = await LessonProgress.find({ userId })
+    .sort({ lastWatchedAt: -1 })
+    .limit(1)
+    .populate({
+      path: "lessonId",
+      populate: { path: "skillId", select: "title" },
+      populate: { path: "moduleId", select: "title" },
+    })
+    .lean();
+
+  if (!latestProgress[0]) return null;
+
+  return {
+    skill: latestProgress[0].lessonId.skillId,
+    module: latestProgress[0].lessonId.moduleId,
+    lesson: {
+      ...latestProgress[0].lessonId,
+      progressPercentage: latestProgress[0].progressPercentage,
+      lastWatchedSecond: latestProgress[0].lastWatchedSecond,
+      isCompleted: latestProgress[0].isCompleted,
+      lastWatchedAt: latestProgress[0].lastWatchedAt,
+    },
+  };
+};
