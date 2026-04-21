@@ -5,6 +5,7 @@ import { setWeeklyGoalSchema } from "../validators/userStatsValidator.js";
 import {
   getUserStats,
   updateWeeklyGoal,
+  getWeeklyProgressController,
 } from "../controllers/userStats.controller.js";
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.use(protect);
 
 router.get("/", getUserStats);
 router.put("/goal", validateBody(setWeeklyGoalSchema), updateWeeklyGoal);
+router.get("/weekly-progress", getWeeklyProgressController);
 
 export default router;
