@@ -3,6 +3,7 @@ import {
   updateLessonProgressService,
   markLessonCompleteService,
   getLatestWatchedLessonService,
+  getRecentActivityService,
 } from "../services/lessonProgress.service.js";
 
 export const getLessonProgressController = async (req, res, next) => {
@@ -16,6 +17,19 @@ export const getLessonProgressController = async (req, res, next) => {
       status: "success",
       message: "Lesson progress retrieved successfully",
       data: progress,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRecentActivityController = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const recent = await getRecentActivityService(req.user.id, limit);
+    res.status(200).json({
+      status: "success",
+      data: recent,
     });
   } catch (error) {
     next(error);

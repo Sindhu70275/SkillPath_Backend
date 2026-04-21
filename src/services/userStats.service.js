@@ -68,10 +68,10 @@ export const updateWeeklyProgressService = (stats) => {
 };
 
 export const handleLessonCompletionStats = async (userId) => {
-  const stats = await getOrCreateUserStats(userId);
+  const stats = await getUserStatsService(userId);
 
   updateDailyStreak(stats);
-  updateWeeklyProgress(stats);
+  updateWeeklyProgressService(stats);
 
   await stats.save();
 
@@ -91,4 +91,26 @@ export const updateWeeklyGoalService = async (userId, weeklyGoal) => {
   stats.weeklyGoal = weeklyGoal;
   await stats.save();
   return stats;
+};
+
+export const getWeeklyProgressService = async (userId) => {
+  const stats = await getUserStatsService(userId);
+  const now = dayjs();
+  const daysLeft = stats.goalEndDate
+    ? dayjs(stats.goalEndDate).diff(now, "day") + 1
+    : 7;
+  const percentage =
+    stats.weeklyGoal > 0
+      ? Math.round((stats.weeklyCompleted / stats.weeklyGoal) * 100)
+      : 0;
+  return {
+    percentage,
+    completed: stats.weeklyCompleted,
+    goal: stats.weeklyGoal,
+    streak: stats.currentWeeklyStreak,
+    longestStreak: stats.longestWeeklyStreak,
+    daysLeft,
+    isCurrentWeekActive: dayjs(stats.goalStartDate).isSame(now, "week"),
+    goalEndDate: stats.goalEndDate,
+  };
 };
